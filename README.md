@@ -1,3 +1,3 @@
-# Any Backup
+# Notes Forever 📝
 
-Backup any local macOS directory to a Git repository for easy version control.
+Backup macOS Notes to a Git repository so you'll never lose them !
