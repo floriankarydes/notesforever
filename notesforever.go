@@ -99,7 +99,7 @@ func openSyncLink() (*sync.Link, error) {
 	}
 	gitDir := filepath.Join(homeDir, gitUserDir)
 	syncDir := filepath.Join(homeDir, notesUserDir)
-	repo, err := git.New(gitDir, "")
+	repo, err := git.Open(gitDir, "")
 	if err != nil {
 		return nil, err
 	}

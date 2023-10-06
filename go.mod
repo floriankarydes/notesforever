@@ -9,6 +9,7 @@ require (
 	github.com/google/go-github/v55 v55.0.0
 	github.com/keybase/go-keychain v0.0.0-20230523030712-b5615109f100
 	github.com/pkg/errors v0.9.1
+	github.com/pkg/xattr v0.4.9
 	github.com/urfave/cli/v2 v2.25.7
 	golang.org/x/sys v0.12.0
 	gotest.tools/v3 v3.5.1

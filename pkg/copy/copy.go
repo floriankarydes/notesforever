@@ -13,6 +13,7 @@ import (
 	"github.com/containerd/containerd/pkg/userns"
 	"github.com/docker/docker/pkg/pools"
 	"github.com/docker/docker/pkg/system"
+	"github.com/pkg/xattr"
 	"golang.org/x/sys/unix"
 )
 
@@ -50,7 +51,7 @@ func legacyCopy(srcFile io.Reader, dstFile io.Writer) error {
 }
 
 func copyXattr(srcPath, dstPath, attr string) error {
-	data, err := system.Lgetxattr(srcPath, attr)
+	data, err := xattr.LGet(srcPath, attr)
 	if err != nil {
 		if errors.Is(err, syscall.EOPNOTSUPP) {
 			// Task failed successfully: there is no xattr to copy
@@ -60,7 +61,7 @@ func copyXattr(srcPath, dstPath, attr string) error {
 		return err
 	}
 	if data != nil {
-		if err := system.Lsetxattr(dstPath, attr, data, 0); err != nil {
+		if err := xattr.LSet(dstPath, attr, data); err != nil {
 			return err
 		}
 	}
@@ -174,9 +175,7 @@ func DirCopy(srcDir, dstDir string, copyMode Mode, copyOpaqueXattrs bool) error 
 			return err
 		}
 
-		if err := copyXattr(srcPath, dstPath, "security.capability"); err != nil {
-			return err
-		}
+		copyXattr(srcPath, dstPath, "security.capability") // Ignore error for macOS.
 
 		if copyOpaqueXattrs {
 			if err := doCopyXattrs(srcPath, dstPath); err != nil {
@@ -205,10 +204,10 @@ func DirCopy(srcDir, dstDir string, copyMode Mode, copyOpaqueXattrs bool) error 
 				return err
 			}
 		} else {
-			ts := []syscall.Timespec{stat.Atimespec, stat.Mtimespec}
-			if err := system.LUtimesNano(dstPath, ts); err != nil {
-				return err
-			}
+			ats := unix.Timespec{Sec: stat.Atimespec.Sec, Nsec: stat.Atimespec.Nsec}
+			mts := unix.Timespec{Sec: stat.Mtimespec.Sec, Nsec: stat.Mtimespec.Nsec}
+			ts := []unix.Timespec{ats, mts}
+			unix.UtimesNano(dstPath, ts) // Ignore error for macOS.
 		}
 		return nil
 	})
@@ -217,10 +216,10 @@ func DirCopy(srcDir, dstDir string, copyMode Mode, copyOpaqueXattrs bool) error 
 	}
 	for e := dirsToSetMtimes.Front(); e != nil; e = e.Next() {
 		mtimeInfo := e.Value.(*dirMtimeInfo)
-		ts := []syscall.Timespec{mtimeInfo.stat.Atimespec, mtimeInfo.stat.Mtimespec}
-		if err := system.LUtimesNano(*mtimeInfo.dstPath, ts); err != nil {
-			return err
-		}
+		ats := unix.Timespec{Sec: mtimeInfo.stat.Atimespec.Sec, Nsec: mtimeInfo.stat.Atimespec.Nsec}
+		mts := unix.Timespec{Sec: mtimeInfo.stat.Mtimespec.Sec, Nsec: mtimeInfo.stat.Mtimespec.Nsec}
+		ts := []unix.Timespec{ats, mts}
+		unix.UtimesNano(*mtimeInfo.dstPath, ts) // Ignore error for macOS.
 	}
 
 	return nil

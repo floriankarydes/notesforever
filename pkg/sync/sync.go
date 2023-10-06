@@ -3,6 +3,7 @@ package sync
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/floriankarydes/notesforever/pkg/copy"
 	"github.com/floriankarydes/notesforever/pkg/git"
@@ -49,16 +50,10 @@ func (m *Link) Backup() error {
 }
 
 func (m *Link) Restore() error {
-	defer m.repo.Clean()
-
-	// Pull Git repository.
-	if err := m.repo.Pull(); err != nil {
-		return errors.Wrap(err, "failed to pull changes")
-	}
 
 	// Clear src directory.
-	if err := os.RemoveAll(m.srcDir); err != nil {
-		return errors.Wrap(err, "failed to remove source directory")
+	if err := os.Rename(m.srcDir, m.saveDir()); err != nil {
+		return errors.Wrap(err, "failed to save source directory")
 	}
 	if err := os.MkdirAll(m.srcDir, git.DirPerm); err != nil {
 		return errors.Wrap(err, "failed to re-create source directory")
@@ -74,4 +69,8 @@ func (m *Link) Restore() error {
 
 func (m *Link) dstDir() string {
 	return filepath.Join(m.repo.Dir(), backupDirname)
+}
+
+func (m *Link) saveDir() string {
+	return "notesforever_NotesBackup_" + time.Now().Format("20060102150405")
 }
