@@ -4,19 +4,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/floriankarydes/anybackup/pkg/copy"
-	"github.com/floriankarydes/anybackup/pkg/git"
+	"github.com/floriankarydes/notesforever/pkg/copy"
+	"github.com/floriankarydes/notesforever/pkg/git"
 	"github.com/pkg/errors"
 )
 
 type Link struct {
-	repo   git.Repo
+	repo   *git.Repo
 	srcDir string
 }
 
 const backupDirname = "backup"
 
-func New(repo git.Repo, srcDir string) (*Link, error) {
+func New(repo *git.Repo, srcDir string) (*Link, error) {
 	m := &Link{
 		repo:   repo,
 		srcDir: srcDir,
@@ -25,7 +25,7 @@ func New(repo git.Repo, srcDir string) (*Link, error) {
 }
 
 func (m *Link) Backup() error {
-	defer m.repo.Discard()
+	defer m.repo.Clean()
 
 	// Clear destination directory.
 	if err := os.RemoveAll(m.dstDir()); err != nil {
@@ -49,6 +49,7 @@ func (m *Link) Backup() error {
 }
 
 func (m *Link) Restore() error {
+	defer m.repo.Clean()
 
 	// Pull Git repository.
 	if err := m.repo.Pull(); err != nil {

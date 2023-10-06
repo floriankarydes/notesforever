@@ -1,10 +1,19 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
+	"path/filepath"
 
+	"github.com/floriankarydes/notesforever/pkg/git"
+	"github.com/floriankarydes/notesforever/pkg/sync"
 	"github.com/urfave/cli/v2"
+)
+
+const (
+	notesUserDir = "Library/Group Containers/group.com.apple.notes"
+	gitUserDir   = ".notesforever"
 )
 
 func main() {
@@ -16,7 +25,7 @@ func main() {
 			{
 				Name:    "init",
 				Aliases: []string{"i"},
-				Usage:   "initialize backup system",
+				Usage:   "initialize backup file system",
 				Action:  Init,
 			},
 			{
@@ -34,7 +43,7 @@ func main() {
 			{
 				Name:    "configure",
 				Aliases: []string{"c"},
-				Usage:   "initialize backup system & set up backup service",
+				Usage:   "initialize backup file system & set up background service",
 				Action:  Configure,
 			},
 		},
@@ -46,21 +55,53 @@ func main() {
 }
 
 func Init(c *cli.Context) error {
-	//TODO
+	_, err := openSyncLink()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func Backup(c *cli.Context) error {
-	//TODO
+	link, err := openSyncLink()
+	if err != nil {
+		return err
+	}
+	if err := link.Backup(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func Restore(c *cli.Context) error {
-	//TODO
+	link, err := openSyncLink()
+	if err != nil {
+		return err
+	}
+	if err := link.Restore(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func Configure(c *cli.Context) error {
-	//TODO
-	return nil
+	_, err := openSyncLink()
+	if err != nil {
+		return err
+	}
+	return errors.New("implement me")
+}
+
+func openSyncLink() (*sync.Link, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	gitDir := filepath.Join(homeDir, gitUserDir)
+	syncDir := filepath.Join(homeDir, notesUserDir)
+	repo, err := git.New(gitDir, "")
+	if err != nil {
+		return nil, err
+	}
+	return sync.New(repo, syncDir)
 }
