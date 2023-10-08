@@ -1,19 +1,20 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/floriankarydes/notesforever/pkg/git"
+	"github.com/floriankarydes/notesforever/pkg/service"
 	"github.com/floriankarydes/notesforever/pkg/sync"
 	"github.com/urfave/cli/v2"
 )
 
 const (
+	moduleName   = "notesforever"
 	notesUserDir = "Library/Group Containers/group.com.apple.notes"
-	gitUserDir   = ".notesforever"
+	gitUserDir   = "." + moduleName
 )
 
 func main() {
@@ -85,11 +86,13 @@ func Restore(c *cli.Context) error {
 }
 
 func Configure(c *cli.Context) error {
-	_, err := openSyncLink()
-	if err != nil {
+	if _, err := openSyncLink(); err != nil {
 		return err
 	}
-	return errors.New("implement me")
+	if err := service.RunEverydayAt(0, moduleName, "backup"); err != nil {
+		return err
+	}
+	return nil
 }
 
 func openSyncLink() (*sync.Link, error) {
