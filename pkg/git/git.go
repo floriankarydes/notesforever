@@ -194,8 +194,10 @@ func (r *Repo) create() error {
 
 // Clone Git repository.
 func (r *Repo) clone() error {
-	if err := os.Rename(r.dir, r.saveDir()); err != nil {
-		return errors.Wrap(err, "failed to save existing directory")
+	if _, err := os.Stat("temp"); !os.IsNotExist(err) {
+		if err := os.Rename(r.dir, r.saveDir()); err != nil {
+			return errors.Wrap(err, "failed to save existing directory")
+		}
 	}
 	_, err := git.PlainClone(r.dir, false, &git.CloneOptions{
 		Auth:     r.auth(),
