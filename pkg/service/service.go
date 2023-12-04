@@ -39,7 +39,7 @@ const plistTemplateSrc = `
 		<string>/tmp</string>
 
     <key>RunAtLoad</key>
-    <true/>
+    <false/>
 
     <key>StartCalendarInterval</key>
 		<array>

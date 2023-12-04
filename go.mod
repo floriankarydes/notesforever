@@ -8,6 +8,7 @@ require (
 	github.com/go-git/go-git/v5 v5.9.0
 	github.com/google/go-github/v55 v55.0.0
 	github.com/keybase/go-keychain v0.0.0-20230523030712-b5615109f100
+	github.com/otiai10/copy v1.14.0
 	github.com/pkg/errors v0.9.1
 	github.com/pkg/xattr v0.4.9
 	github.com/shirou/gopsutil/v3 v3.23.9
@@ -48,6 +49,7 @@ require (
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )

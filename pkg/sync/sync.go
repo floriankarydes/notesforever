@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/floriankarydes/notesforever/pkg/copy"
 	"github.com/floriankarydes/notesforever/pkg/git"
+	cp "github.com/otiai10/copy"
 	"github.com/pkg/errors"
 )
 
@@ -37,7 +37,7 @@ func (m *Link) Backup() error {
 	}
 
 	// Copy files to destination directory.
-	if err := copy.DirCopy(m.srcDir, m.dstDir(), copy.Hardlink, false); err != nil {
+	if err := cp.Copy(m.srcDir, m.dstDir()); err != nil {
 		return errors.Wrap(err, "failed to copy directory")
 	}
 
@@ -60,7 +60,7 @@ func (m *Link) Restore() error {
 	}
 
 	// Copy files from Git repository.
-	if err := copy.DirCopy(m.dstDir(), m.srcDir, copy.Hardlink, false); err != nil {
+	if err := cp.Copy(m.dstDir(), m.srcDir); err != nil {
 		return errors.Wrap(err, "failed to copy directory")
 	}
 
